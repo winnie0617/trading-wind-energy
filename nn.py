@@ -16,27 +16,31 @@ from keras.callbacks import EarlyStopping
 from keras.layers import LSTM
 import csv
 
+
 X_energyDataWithWindow =[]
 Y_energyDataWithWindow =[]
 #Variables
 def convertData(windowSize):
-    with open('DataWithNormalTime.csv') as csv_file:
+    with open('/Users/issac/Documents/GitHub/trading-wind-energy/DataWithNormalTime.csv') as csv_file:
+        windowSize+=1
         energyData= []
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             energyData.append(row[1])
-        print(len(energyData))
         line_count =0
         for b in energyData:
-            if line_count-windowSize>=0:
+            if line_count-(windowSize)>=0:
                 y= []
                 for x in range(windowSize):
                     y.append(energyData[line_count-x-1])
-                X_energyDataWithWindow.append(y)
-                Y_energyDataWithWindow.append(energyData[line_count])
+                X_energyDataWithWindow.append(y[1:windowSize])
+                Y_energyDataWithWindow.append(y[0])
             line_count+=1
 
-convertData(10)
+convertData(48)
+print(X_energyDataWithWindow[100])
+print(Y_energyDataWithWindow[100])
+
 
 #split the data into input and output
 x=X_energyDataWithWindow
@@ -59,9 +63,9 @@ X_test=X_test.reshape(X_test.shape[0],X_test.shape[1],1)
 
 #Build model
 model = Sequential()
-model.add(LSTM(10,  activation='tanh', input_shape=(10, 1),return_sequences=True))
-#model.add(Dense(10, activation='relu'))
-model.add(LSTM(8, activation='tanh'))
+model.add(LSTM(32,  activation='tanh', input_shape=(48, 1),return_sequences=True))
+model.add(LSTM(16, activation='tanh',return_sequences=True))
+model.add(LSTM(4, activation='tanh'))
 model.add(Dropout(0.01))
 model.add(Dense(1, activation='linear'))
 model.summary()
@@ -78,5 +82,5 @@ plt.ylabel('loss')
 plt.xlabel('epoch')
 plt.legend()
 plt.show()
-plt.savefig('trainingvstestaccuracy.png')
-'''
+
+
