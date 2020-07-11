@@ -1,7 +1,8 @@
 from csv import writer
 import csv
 import datetime
-
+import pytz
+from datetime import timedelta
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # note that time zone is a problem now the time starts at 8:00
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -19,7 +20,5 @@ with open('DataWithNormalTime.csv', 'a+',  newline='') as write_obj:
         csv_writer = writer(write_obj)
         array = []
         array = row.split('=')
-        newTime = datetime.datetime.fromtimestamp(int(array[0][0:10]))
-        # print(array[0])
-        # print(array[0][0:11])
+        newTime = datetime.datetime.fromtimestamp(int(array[0][0:10]))-timedelta(hours=8)
         csv_writer.writerow([newTime.strftime('%Y-%m-%d %H:%M:%S'), array[1]])
