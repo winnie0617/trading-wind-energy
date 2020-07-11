@@ -3,19 +3,23 @@ import csv
 import datetime
 
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#note that time zone is a problem now the time starts at 8:00
+# note that time zone is a problem now the time starts at 8:00
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-with open('/Users/issac/Documents/GitHub/trading-wind-energy/rawData.csv') as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            abc = row
+with open('rawData.csv') as csv_file:
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    for row in csv_reader:
+        abc = row
+        print("hello")
 
-with open('DataWithNormalTime.csv','a+',  newline='') as write_obj:
+with open('DataWithNormalTime.csv', 'a+',  newline='') as write_obj:
     for row in abc:
+        row = row.strip()
+        print(row)
         csv_writer = writer(write_obj)
         array = []
         array = row.split('=')
-        newTime = datetime.datetime.fromtimestamp(int(array[0][0:11]))
-        print(newTime)
-        csv_writer.writerow([newTime.strftime('%Y-%m-%d %H:%M:%S'),array[1]])
+        newTime = datetime.datetime.fromtimestamp(int(array[0][0:10]))
+        # print(array[0])
+        # print(array[0][0:11])
+        csv_writer.writerow([newTime.strftime('%Y-%m-%d %H:%M:%S'), array[1]])
