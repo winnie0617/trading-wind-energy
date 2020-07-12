@@ -15,6 +15,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from keras.callbacks import EarlyStopping
 from keras.layers import LSTM
 import csv
+from interpolate import interpolate
 
 
 X_energyDataWithWindow = []
@@ -41,8 +42,8 @@ def convertData(windowSize):
 
 
 convertData(48)
-print(X_energyDataWithWindow[100])
-print(Y_energyDataWithWindow[100])
+# print(X_energyDataWithWindow[100])
+# print(Y_energyDataWithWindow[100])
 
 
 # Split the data into input and output
