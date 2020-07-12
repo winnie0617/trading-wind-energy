@@ -15,7 +15,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from keras.callbacks import EarlyStopping
 from keras.layers import LSTM
 import csv
-from interpolate import interpolate
+from preprocess import interpolate
 
 
 X_energyDataWithWindow = []
