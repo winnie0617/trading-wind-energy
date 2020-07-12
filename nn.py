@@ -21,7 +21,7 @@ from preprocess import interpolate
 X_energyDataWithWindow = []
 Y_energyDataWithWindow = []
 # Variables
-
+WINDOW_SIZE = 24
 
 def convertData(windowSize):
     with open('DataWithNormalTime.csv') as csv_file:
@@ -41,7 +41,7 @@ def convertData(windowSize):
             line_count += 1
 
 
-convertData(48)
+convertData(WINDOW_SIZE)
 # print(X_energyDataWithWindow[100])
 # print(Y_energyDataWithWindow[100])
 
@@ -68,7 +68,7 @@ X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
-model.add(LSTM(32,  activation='tanh', input_shape=(48, 1), return_sequences=True))
+model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE, 1), return_sequences=True))
 model.add(LSTM(16, activation='tanh', return_sequences=True))
 model.add(LSTM(4, activation='tanh'))
 model.add(Dropout(0.01))
