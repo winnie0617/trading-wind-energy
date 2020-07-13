@@ -48,6 +48,12 @@ convertData(WINDOW_SIZE)
 # print(X_energyDataWithWindow[100])
 # print(Y_energyDataWithWindow[100])
 
+# Get wind speed data
+df = pd.read_csv('average-wind-speed.csv')
+speeds = df['Average Speed (m/s)'].to_numpy().reshape(-1, 1) 
+scaler_speed = MinMaxScaler()
+scaler_speed.fit(speeds)
+speeds_scaled = scaler_speed.transform(speeds)
 
 # Split the data into input and output
 x = X_energyDataWithWindow
