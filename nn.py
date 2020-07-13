@@ -23,27 +23,30 @@ Y_energyDataWithWindow = []
 # Variables
 WINDOW_SIZE = 24
 
-def convertData(windowSize):
-    with open('DataWithNormalTime.csv') as csv_file:
-        windowSize += 1
-        energyData = []
+
+
+def convertData(window_size):
+    with open('energy-interpolated.csv') as csv_file:
+        window_size += 1
+        energy_data = []
         csv_reader = csv.reader(csv_file, delimiter=',')
+        next(csv_reader, None)
         for row in csv_reader:
-            energyData.append(row[1])
+            energy_data.append(row[1])
         line_count = 0
-        for b in energyData:
-            if line_count-(windowSize) >= 0:
+        for b in energy_data:
+            if line_count-(window_size) >= 0:
                 y = []
-                for x in range(windowSize):
-                    y.append(energyData[line_count-x-1])
-                X_energyDataWithWindow.append(y[1:windowSize])
+                for x in range(window_size):
+                    y.append(energy_data[line_count-x-1])
+                X_energyDataWithWindow.append(y[1:window_size])
                 Y_energyDataWithWindow.append(y[0])
             line_count += 1
 
 
 convertData(WINDOW_SIZE)
-# print(X_energyDataWithWindow[100])
-# print(Y_energyDataWithWindow[100])
+print(X_energyDataWithWindow[100])
+print(Y_energyDataWithWindow[100])
 
 
 # Split the data into input and output
@@ -80,7 +83,7 @@ model.compile(loss='mean_squared_error', optimizer=opt)
 es = EarlyStopping(monitor='val_loss', patience=2)
 
 # Train model
-history = model.fit(X_train, y_train, epochs=2,
+history = model.fit(X_train, y_train, epochs=5,
                     validation_split=0.2, batch_size=32, callbacks=[es])
 
 # Plot graphs regarding the results
@@ -98,8 +101,8 @@ predictions_array = model.predict(
     X_test, batch_size=32, callbacks=[es], verbose=1)
 
 # Plot predictions vs actuals
-plt.plot(predictions_array[:1000], label='predictions')
-plt.plot(y_test[:1000], label='actuals')
+plt.plot(predictions_array[800:1000], label='predictions')
+plt.plot(y_test[800:1000], label='actuals')
 plt.legend()
 plt.title('Predictions vs Actuals - First 1000')
 plt.show()

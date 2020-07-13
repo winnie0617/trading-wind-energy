@@ -22,3 +22,4 @@ if __name__ == "__main__":
         df_list.append(df)
     df = pd.concat(df_list, axis=1).mean(axis=1)
     df.to_csv('average-wind-speed.csv', index_label='Time', header=['Average Speed (m/s)'])
+
