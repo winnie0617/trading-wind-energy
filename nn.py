@@ -10,7 +10,7 @@ from sklearn.preprocessing import MinMaxScaler
 from keras.models import Sequential
 from keras.layers import GaussianNoise
 from keras.layers import Dense
-from keras import optimizers
+from keras import optimizers, metrics
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras.callbacks import EarlyStopping
 from keras.layers import LSTM
@@ -45,8 +45,8 @@ def convertData(window_size):
 
 
 convertData(WINDOW_SIZE)
-print(X_energyDataWithWindow[100])
-print(Y_energyDataWithWindow[100])
+# print(X_energyDataWithWindow[100])
+# print(Y_energyDataWithWindow[100])
 
 
 # Split the data into input and output
@@ -95,10 +95,16 @@ plt.title('Train and Validation Loss')
 plt.legend()
 plt.show()
 
+# Evaluate the model on test data
+print('Evaluate on test data')
+results = model.evaluate(X_test, y_test, batch_size=32)
+print('Test loss: ', results)
+
+
 # Predict
 print('Generating Predictions')
 predictions_array = model.predict(
-    X_test, batch_size=32, callbacks=[es], verbose=1)
+    X_test, batch_size=32, callbacks=[es])
 
 # Plot predictions vs actuals
 plt.plot(predictions_array[800:1000], label='predictions')
