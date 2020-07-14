@@ -59,25 +59,38 @@ speeds_scaled = scaler_speed.transform(speeds)
 x = X_energyDataWithWindow
 y = Y_energyDataWithWindow
 y = np.reshape(y, (-1, 1))
+
 # Normalization
 scaler_x = MinMaxScaler()
 scaler_y = MinMaxScaler()
-print(scaler_x.fit(x))
+scaler_x.fit(x)
 xscale = scaler_x.transform(x)
-print(scaler_y.fit(y))
+scaler_y.fit(y)
 yscale = scaler_y.transform(y)
 
 
+# Append speed data to input (for now we have more speed data than energy production. This might need to be modified later.)
+# Start with the WINDOW_SIZE-th speed input
+print(xscale[xscale.shape[0]-1])
+num_inputs = xscale.shape[0]
+x_with_speed = np.empty((xscale.shape[0], WINDOW_SIZE+1))
+for i in range(num_inputs):
+    x_with_speed[i] = np.append(xscale[i],speeds_scaled[i+WINDOW_SIZE])
+print("after")
+print(speeds_scaled[24])
+print(x_with_speed[0])
+print(x_with_speed[xscale.shape[0]-1])
+
 # Split the data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
-    xscale, yscale, test_size=0.2, random_state=0)
+    x_with_speed, yscale, test_size=0.2, random_state=0)
 n_features = 1
 X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
 X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
-model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE, 1), return_sequences=True))
+model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE+1, 1), return_sequences=True))
 model.add(LSTM(16, activation='tanh', return_sequences=True))
 model.add(LSTM(4, activation='tanh'))
 model.add(Dropout(0.01))
