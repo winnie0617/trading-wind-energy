@@ -21,8 +21,9 @@ from preprocess import interpolate
 X_energyDataWithWindow = []
 Y_energyDataWithWindow = []
 # Variables
-WINDOW_SIZE = 24
-
+WINDOW_SIZE = 6
+df = pd.read_csv('average-wind-speed.csv')
+speeds = df['Average Speed (m/s)']
 
 
 def convertData(window_size):
@@ -39,7 +40,9 @@ def convertData(window_size):
                 y = []
                 for x in range(window_size):
                     y.append(energy_data[line_count-x-1])
-                X_energyDataWithWindow.append(y[1:window_size])
+                for i in range(window_size):
+                    y.append(speeds[line_count-i-1])
+                X_energyDataWithWindow.append(y[1:window_size*2-1])
                 Y_energyDataWithWindow.append(y[0])
             line_count += 1
 
@@ -49,11 +52,8 @@ convertData(WINDOW_SIZE)
 # print(Y_energyDataWithWindow[100])
 
 # Get wind speed data
-df = pd.read_csv('average-wind-speed.csv')
-speeds = df['Average Speed (m/s)'].to_numpy().reshape(-1, 1) 
-scaler_speed = MinMaxScaler()
-scaler_speed.fit(speeds)
-speeds_scaled = scaler_speed.transform(speeds)
+
+
 
 # Split the data into input and output
 x = X_energyDataWithWindow
@@ -77,7 +77,7 @@ X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
-model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE, 1), return_sequences=True))
+model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE*2, 1), return_sequences=True))
 model.add(LSTM(16, activation='tanh', return_sequences=True))
 model.add(LSTM(4, activation='tanh'))
 model.add(Dropout(0.01))
