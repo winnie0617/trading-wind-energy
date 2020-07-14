@@ -71,15 +71,10 @@ yscale = scaler_y.transform(y)
 
 # Append speed data to input (for now we have more speed data than energy production. This might need to be modified later.)
 # Start with the WINDOW_SIZE-th speed input
-print(xscale[xscale.shape[0]-1])
 num_inputs = xscale.shape[0]
 x_with_speed = np.empty((xscale.shape[0], WINDOW_SIZE+1))
 for i in range(num_inputs):
     x_with_speed[i] = np.append(xscale[i],speeds_scaled[i+WINDOW_SIZE])
-print("after")
-print(speeds_scaled[24])
-print(x_with_speed[0])
-print(x_with_speed[xscale.shape[0]-1])
 
 # Split the data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
@@ -90,19 +85,20 @@ X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
-model.add(LSTM(32,  activation='tanh', input_shape=(WINDOW_SIZE+1, 1), return_sequences=True))
-model.add(LSTM(16, activation='tanh', return_sequences=True))
+model.add(LSTM(16,  activation='tanh', input_shape=(WINDOW_SIZE+1, 1), return_sequences=True))
+model.add(Dropout(0.1))
+# model.add(LSTM(16, activation='tanh', return_sequences=True))
 model.add(LSTM(4, activation='tanh'))
-model.add(Dropout(0.01))
+model.add(Dropout(0.1))
 model.add(Dense(1, activation='linear'))
 model.summary()
 
 opt = optimizers.Adam(learning_rate=0.01)
 model.compile(loss='mean_squared_error', optimizer=opt)
-es = EarlyStopping(monitor='val_loss', patience=2)
+es = EarlyStopping(monitor='val_loss', patience=5)
 
 # Train model
-history = model.fit(X_train, y_train, epochs=5,
+history = model.fit(X_train, y_train, epochs=20,
                     validation_split=0.2, batch_size=32, callbacks=[es])
 
 # Plot graphs regarding the results
