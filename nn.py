@@ -145,13 +145,13 @@ plt.title('Predictions vs Actuals - First 1000')
 plt.show()
 
 
-'''
+
 #Test particular prediction
 x=1210
 print(X_energyDataWithWindow[x])
 data=scaler_x.transform([X_energyDataWithWindow[x]])
-#data=data.reshape(1,WINDOW_SIZE*2, 1)
+data=data.reshape(1,WINDOW_SIZE*2, 1)
 datay=model.predict(data)
 print(scaler_y.inverse_transform(datay))
 print(Y_energyDataWithWindow[x])
-'''
+
