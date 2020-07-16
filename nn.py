@@ -44,14 +44,15 @@ def convertData(window_size):
                 Y_energyDataWithWindow.append(y[0])
             line_count += 1
 
+
 convertData(WINDOW_SIZE)
-#print(X_energyDataWithWindow[1])
+# print(X_energyDataWithWindow[1])
 print(X_energyDataWithWindow[100])
 print(Y_energyDataWithWindow[100])
 
 # Get wind speed data
 df = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
-speeds = df['Average Speed (m/s)'].to_numpy().reshape(-1, 1) 
+speeds = df['Average Speed (m/s)'].to_numpy().reshape(-1, 1)
 scaler_speed = MinMaxScaler()
 scaler_speed.fit(speeds)
 speeds_scaled = scaler_speed.transform(speeds)
@@ -60,6 +61,7 @@ speeds_scaled = scaler_speed.transform(speeds)
 x = X_energyDataWithWindow
 y = Y_energyDataWithWindow
 y = np.reshape(y, (-1, 1))
+
 # Normalization
 scaler_x = MinMaxScaler()
 scaler_y = MinMaxScaler()
@@ -73,7 +75,7 @@ yscale = scaler_y.transform(y)
 num_inputs = xscale.shape[0]
 x_with_speed = np.empty((xscale.shape[0], WINDOW_SIZE*2))
 for i in range(num_inputs):
-    x_with_speed[i] = np.append(xscale[i],speeds_scaled[i: i+WINDOW_SIZE])
+    x_with_speed[i] = np.append(xscale[i], speeds_scaled[i: i+WINDOW_SIZE])
 # Split the data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
     x_with_speed, yscale, test_size=0.2, random_state=0)
@@ -85,26 +87,27 @@ n_features = 1
 # Build model
 model = Sequential()
 
-#model.add(LSTM(48,  activation='tanh', input_shape=(WINDOW_SIZE*2, 1), return_sequences=True))
-#model.add(Dense(48, activation='relu',input_dim=96))
-##model.add(Dense(32, activation='relu'))
-#model.add(LSTM(24, activation='tanh'))
-#model.add(Dropout(0.01))
-#model.add(Dense(1, activation='linear'))
-#model.summary()
-
-model.add(Dense(WINDOW_SIZE, activation='relu',input_dim=WINDOW_SIZE*2))
-model.add(Dense(32, activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(16, activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(8, activation='relu'))
-model.add(Dropout(0.1))
-model.add(Dense(4, activation='relu'))
-
-model.add(Dropout(0.1))
+model.add(LSTM(48,  activation='tanh', input_shape=(
+    WINDOW_SIZE*2, 1), return_sequences=True))
+model.add(Dense(48, activation='relu', input_dim=96))
+#model.add(Dense(32, activation='relu'))
+model.add(LSTM(24, activation='tanh'))
+model.add(Dropout(0.01))
 model.add(Dense(1, activation='linear'))
 model.summary()
+
+# model.add(Dense(WINDOW_SIZE, activation='relu',input_dim=WINDOW_SIZE*2))
+# model.add(Dense(32, activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(16, activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(8, activation='relu'))
+# model.add(Dropout(0.1))
+# model.add(Dense(4, activation='relu'))
+
+# model.add(Dropout(0.1))
+# model.add(Dense(1, activation='linear'))
+# model.summary()
 opt = optimizers.Adam(learning_rate=0.001)
 model.compile(loss='mean_squared_error', optimizer=opt)
 es = EarlyStopping(monitor='val_loss', patience=5)
