@@ -27,7 +27,7 @@ speeds = df['Average Speed (m/s)']
 
 
 def convertData(window_size):
-    with open('../energy-interpolated.csv') as csv_file:
+    with open('../trading-wind-energy/energy-interpolated.csv') as csv_file:
         energy_data = []
         csv_reader = csv.reader(csv_file, delimiter=',')
         next(csv_reader, None)
@@ -50,7 +50,7 @@ print(X_energyDataWithWindow[100])
 print(Y_energyDataWithWindow[100])
 
 # Get wind speed data
-df = pd.read_csv('../average-wind-speed.csv')
+df = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
 speeds = df['Average Speed (m/s)'].to_numpy().reshape(-1, 1) 
 scaler_speed = MinMaxScaler()
 scaler_speed.fit(speeds)
