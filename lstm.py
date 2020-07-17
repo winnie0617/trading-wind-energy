@@ -25,6 +25,7 @@ Y_energyDataWithWindow = []
 BATCH_SIZE = 32
 TIMESTEPS = 24
 EPOCH = 20
+PATIENCE = 3
 
 df = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
 speeds = df['Average Speed (m/s)']
@@ -62,11 +63,15 @@ scaler_energys.fit(energys)
 energys_scaled = scaler_energys.transform(energys)
 
 # Get shifted energy production data
-energys_shifted = df_energy['Energy Prooduction (kWh)'].shift(18)[
-    18:].to_numpy().reshape(-1, 1)
+num_inputs = energys_scaled.shape[0]
+energys_shifted = df_energy['Energy Prooduction (kWh)'].shift(
+    periods=-18)[TIMESTEPS-1:num_inputs-18].to_numpy().reshape(-1, 1)
 scaler_energys_shifted = MinMaxScaler()
 scaler_energys.fit(energys_shifted)
-energys_shifted_scaled = scaler_energys.transform(energys)
+energys_shifted_scaled = scaler_energys.transform(energys_shifted)
+# print("e shifted" + str(energys_shifted[:20, 0]))
+# print(energys_shifted.shape)
+# print("e shifted" + str(energys_shifted[30810:]))
 
 # Get wind speed data
 df_speed = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
@@ -108,7 +113,6 @@ speeds_scaled = scaler_speed.transform(speeds)
 # print("energy_transforemed" + str(energys_transformed.shape))
 
 # Combine energy and speed
-num_inputs = energys_scaled.shape[0]
 x = np.empty((num_inputs, 2))
 for i in range(num_inputs):
     x[i] = np.append(energys_scaled[i], speeds_scaled[i])
@@ -119,14 +123,19 @@ print("x" + str(x.shape))
 x_transformed = []
 for i in range(TIMESTEPS, num_inputs):
     x_transformed.append(x[i-TIMESTEPS:i, :])
-x_transformed= np.array(x_transformed)
-print(x_transformed[:10])
-print("x_transformed" + str(x_transformed.shape))
-
+x_transformed = np.array(x_transformed)
+# print(x_transformed[:10])
+# print("x_transformed" + str(x_transformed.shape))
+# print(x_transformed[x_transformed.shape[0]-40:x_transformed.shape[0]-17])
+print(speeds[-50:-17])
+print("energy:")
+print(energys[-50:-17])
+print("y")
+print(energys_shifted[-30:])
 
 # Split the data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
-    x_transformed, energys_shifted_scaled[24:], test_size=0.2, random_state=0)
+    x_transformed[:-17], energys_shifted_scaled, test_size=0.2, random_state=0)
 
 n_features = 1
 # X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
@@ -140,14 +149,14 @@ model.add(LSTM(48,  activation='tanh', input_shape=(
 model.add(Dense(48, activation='relu', input_dim=96))
 # model.add(Dense(32, activation='relu'))
 model.add(LSTM(24, activation='tanh'))
-model.add(Dropout(0.01))
+model.add(Dropout(0.1))
 model.add(Dense(1, activation='linear'))
 model.summary()
 
 
 opt = optimizers.Adam(learning_rate=0.001)
 model.compile(loss='mean_squared_error', optimizer=opt)
-es = EarlyStopping(monitor='val_loss', patience=5)
+es = EarlyStopping(monitor='val_loss', patience=PATIENCE)
 
 # Train model
 history = model.fit(X_train, y_train, epochs=EPOCH,
@@ -172,7 +181,7 @@ print('Test loss: ', results)
 # Predict
 print('Generating Predictions')
 predictions_array = model.predict(
-    X_test, batch_size=100, callbacks=[es])
+    X_test, batch_size=32, callbacks=[es])
 
 # Plot predictions vs actuals
 plt.plot(predictions_array[700:1000], label='predictions')
