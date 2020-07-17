@@ -87,20 +87,21 @@ n_features = 1
 # Build model
 model = Sequential()
 
-model.add(LSTM(48,  activation='tanh', input_shape=(
-    WINDOW_SIZE*2, 1), return_sequences=True))
-model.add(Dense(48, activation='relu', input_dim=96))
-#model.add(Dense(32, activation='relu'))
-model.add(LSTM(24, activation='tanh'))
-model.add(Dropout(0.01))
+model.add(Dense(WINDOW_SIZE, activation='relu',input_dim=WINDOW_SIZE*2))
+model.add(Dense(32, activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(16, activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(8, activation='relu'))
+model.add(Dropout(0.1))
+model.add(Dense(4, activation='relu'))
+
+model.add(Dropout(0.1))
 model.add(Dense(1, activation='linear'))
 model.summary()
 
-# model.add(Dropout(0.1))
-# model.add(Dense(1, activation='linear'))
-# model.summary()
 opt = optimizers.Adam(learning_rate=0.001)
-model.compile(loss='mean_squared_error', optimizer=opt)
+model.compile(loss='mean_absolute_error', optimizer=opt)
 es = EarlyStopping(monitor='val_loss', patience=5)
 
 # Train model
