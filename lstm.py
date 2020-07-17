@@ -34,8 +34,15 @@ scaler_energys = MinMaxScaler()
 scaler_energys.fit(energys)
 energys_scaled = scaler_energys.transform(energys)
 
+# Get wind speed data
+df_speed = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
+speeds = df_speed['Average Speed (m/s)'].to_numpy().reshape(-1, 1)
+scaler_speed = MinMaxScaler()
+scaler_speed.fit(speeds)
+speeds_scaled = scaler_speed.transform(speeds)
+
 # Get shifted energy production data
-num_inputs = energys_scaled.shape[0]
+num_inputs = speeds_scaled.shape[0]
 energys_shifted = df_energy['Energy Prooduction (kWh)'].shift(
     periods=-18)[TIMESTEPS-1:num_inputs-18].to_numpy().reshape(-1, 1)
 scaler_energys_shifted = MinMaxScaler()
@@ -44,13 +51,6 @@ energys_shifted_scaled = scaler_energys.transform(energys_shifted)
 # print("e shifted" + str(energys_shifted[:20, 0]))
 # print(energys_shifted.shape)
 # print("e shifted" + str(energys_shifted[30810:]))
-
-# Get wind speed data
-df_speed = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
-speeds = df_speed['Average Speed (m/s)'].to_numpy().reshape(-1, 1)
-scaler_speed = MinMaxScaler()
-scaler_speed.fit(speeds)
-speeds_scaled = scaler_speed.transform(speeds)
 
 # Combine energy and speed
 x = np.empty((num_inputs, 2))
