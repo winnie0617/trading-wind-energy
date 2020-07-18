@@ -22,8 +22,6 @@ X_energyDataWithWindow = []
 Y_energyDataWithWindow = []
 # Variables
 WINDOW_SIZE = 24
-df = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
-speeds = df['Average Speed (m/s)']
 
 
 def convertData(window_size):
@@ -81,8 +79,6 @@ X_train, X_test, y_train, y_test = train_test_split(
     x_with_speed, yscale, test_size=0.2, random_state=0)
 
 n_features = 1
-#X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
-#X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
@@ -91,9 +87,9 @@ model.add(Dense(WINDOW_SIZE, activation='relu',input_dim=WINDOW_SIZE*2))
 model.add(Dense(32, activation='relu'))
 model.add(Dropout(0.1))
 model.add(Dense(16, activation='relu'))
-model.add(Dropout(0.1))
+# model.add(Dropout(0.1))
 model.add(Dense(8, activation='relu'))
-model.add(Dropout(0.1))
+# model.add(Dropout(0.1))
 model.add(Dense(4, activation='relu'))
 
 model.add(Dropout(0.1))
@@ -129,14 +125,14 @@ print('Generating Predictions')
 predictions_array = model.predict(
     X_test, batch_size=100, callbacks=[es])
 
-# Plot predictions vs actuals
+# Plot predictions
 plt.plot(predictions_array[700:1000], label='predictions')
 plt.plot(y_test[700:1000], label='actuals')
 plt.legend()
-plt.title('Predictions vs Actuals - First 1000')
+plt.title('Predictions vs Actual')
 plt.show()
 
-
+# P
 
 #Test particular prediction
 x=1210
