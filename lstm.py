@@ -22,7 +22,7 @@ from preprocess import interpolate
 BATCH_SIZE = 320
 TIMESTEPS = 24
 EPOCH = 100
-PATIENCE = 5
+PATIENCE = 10
 
 # Get energy production, wind speed and wind direction data
 
@@ -59,16 +59,22 @@ energys_shifted_scaled = scale_data(energys_shifted)
 # Get max energy production in the window
 max_energy = []
 for i in range(num_inputs):
-    max_energy.append(
-        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].max())
+    if i < TIMESTEPS:
+        max = df_energy['Energy Production (kWh)'][0:i+1].max()
+    else:
+        max = df_energy['Energy Production (kWh)'][i-TIMESTEPS:i+1].max()
+    max_energy.append(max)
 max_energy = np.array(max_energy).reshape(-1, 1)
 max_energy_scaled = scale_data(max_energy)
 
 # Get min energy production in the window
 min_energy = []
 for i in range(num_inputs):
-    min_energy.append(
-        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].min())
+    if i < TIMESTEPS:
+        min = df_energy['Energy Production (kWh)'][0:i+1].min() 
+    else:
+        min = df_energy['Energy Production (kWh)'][i-TIMESTEPS:i+1].min()
+    min_energy.append(min)
 min_energy = np.array(min_energy).reshape(-1, 1)
 min_energy_scaled = scale_data(min_energy)
 
@@ -82,8 +88,31 @@ mean_energy = np.array(mean_energy).reshape(-1, 1)
 mean_energy_scaled = scale_data(mean_energy)
 print(mean_energy[:20])
 '''
+'''
+# Get difference
+print(df_energy['Energy Production (kWh)'].shape)
+print(num_inputs)
+difference = []
+for i in range(num_inputs):
+    difference.append(
+        df_energy['Energy Production (kWh)'][i] - df_energy['Energy Production (kWh)'][i-1])
+difference = np.array(difference).reshape(-1, 1)
+difference_scaled = scale_data(difference)
+print(difference[:20])
+'''
 
-# Combine energy, speed and direction
+'''
+# Get mean energy production in the window
+mean_energy = []
+for i in range(num_inputs):
+    mean_energy.append(
+        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].mean())
+mean_energy = np.array(mean_energy).reshape(-1, 1)
+mean_energy_scaled = scale_data(mean_energy)
+print(mean_energy[:20])
+'''
+
+# Combine everything
 x = np.empty((num_inputs, 5))
 print(max_energy_scaled.shape)
 print(energys_scaled.shape)
@@ -120,10 +149,10 @@ n_features = 1
 model = Sequential()
 
 model.add(LSTM(24,  activation='tanh', input_shape=(
-    TIMESTEPS, 5), return_sequences=False))
-model.add(Dropout(0.1))
+    TIMESTEPS, 5), return_sequences=True))
+# model.add(Dropout(0.1))
 model.add(LSTM(12,return_sequences=False))
-model.add(Dropout(0.01))
+model.add(Dropout(0.1))
 # model.add(Dense(12, activation='relu'))
 # model.add(Dropout(0.1))
 model.add(Dense(1, activation='tanh'))
