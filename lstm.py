@@ -21,41 +21,46 @@ from preprocess import interpolate
 # Configuration
 BATCH_SIZE = 32
 TIMESTEPS = 24
-EPOCH = 500
-PATIENCE = 50
+EPOCH = 20
+PATIENCE = 3
 
 df = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
 speeds = df['Average Speed (m/s)']
 
-# Get energy production data
-df_energy = pd.read_csv('../trading-wind-energy/energy-interpolated.csv')
-energys = df_energy['Energy Prooduction (kWh)'].to_numpy().reshape(-1, 1)
-scaler_energys = MinMaxScaler()
-scaler_energys.fit(energys)
-energys_scaled = scaler_energys.transform(energys)
+# Get energy production, wind speed and wind direction data
 
-# Get wind speed data
-df_speed = pd.read_csv('../trading-wind-energy/average-wind-speed.csv')
-speeds = df_speed['Average Speed (m/s)'].to_numpy().reshape(-1, 1)
-scaler_speed = MinMaxScaler()
-scaler_speed.fit(speeds)
-speeds_scaled = scaler_speed.transform(speeds)
+
+def get_and_scale_data(path_to_csv, col_name):
+    df = pd.read_csv(path_to_csv)
+    data = df[col_name].to_numpy().reshape(-1, 1)
+    scaler = MinMaxScaler()
+    scaler.fit(data)
+    return scaler.transform(data)
+
+energys_scaled = get_and_scale_data(
+    '../trading-wind-energy/energy-interpolated.csv', 'Energy Prooduction (kWh)')
+speeds_scaled = get_and_scale_data(
+    '../trading-wind-energy/average-wind-speed.csv', 'Average Speed (m/s)')
+directions_scaled = get_and_scale_data(
+    '../trading-wind-energy/average-wind-direction.csv', 'Direction (deg N)')
 
 # Get shifted energy production data
 num_inputs = speeds_scaled.shape[0]
+df_energy = pd.read_csv('../trading-wind-energy/energy-interpolated.csv')
 energys_shifted = df_energy['Energy Prooduction (kWh)'].shift(
     periods=-18)[TIMESTEPS-1:num_inputs-18].to_numpy().reshape(-1, 1)
 scaler_energys_shifted = MinMaxScaler()
-scaler_energys.fit(energys_shifted)
-energys_shifted_scaled = scaler_energys.transform(energys_shifted)
+scaler_energys_shifted.fit(energys_shifted)
+energys_shifted_scaled = scaler_energys_shifted.transform(energys_shifted)
 # print("e shifted" + str(energys_shifted[:20, 0]))
 # print(energys_shifted.shape)
 # print("e shifted" + str(energys_shifted[30810:]))
 
-# Combine energy and speed
-x = np.empty((num_inputs, 2))
+# Combine energy, speed and direction
+x = np.empty((num_inputs, 3))
 for i in range(num_inputs):
-    x[i] = np.append(energys_scaled[i], speeds_scaled[i])
+    x[i] = np.append(energys_scaled[i], [
+                     speeds_scaled[i], [directions_scaled[i]]])
 print(x[:10])
 print("x" + str(x.shape))
 
@@ -67,11 +72,11 @@ x_transformed = np.array(x_transformed)
 # print(x_transformed[:10])
 # print("x_transformed" + str(x_transformed.shape))
 # print(x_transformed[x_transformed.shape[0]-40:x_transformed.shape[0]-17])
-print(speeds[-50:-17])
-print("energy:")
-print(energys[-50:-17])
-print("y")
-print(energys_shifted[-30:])
+# print(speeds[-50:-17])
+# print("energy:")
+# print(energys[-50:-17])
+# print("y")
+# print(energys_shifted[-30:])
 
 # Split the data into train and test
 X_train, X_test, y_train, y_test = train_test_split(
@@ -85,7 +90,7 @@ n_features = 1
 model = Sequential()
 
 model.add(LSTM(48,  activation='tanh', input_shape=(
-    TIMESTEPS, 2), return_sequences=False))
+    TIMESTEPS, 3), return_sequences=False))
 model.add(Dense(36, activation='relu', input_dim=96))
 model.add(Dense(24, activation='relu'))
 # model.add(LSTM(24, activation='tanh'))
