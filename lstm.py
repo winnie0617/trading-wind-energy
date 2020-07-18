@@ -111,6 +111,8 @@ model = Sequential()
 model.add(LSTM(24,  activation='tanh', input_shape=(
     TIMESTEPS, 5), return_sequences=False))
 model.add(Dropout(0.1))
+model.add(LSTM(12,return_sequences=False))
+model.add(Dropout(0.01))
 # model.add(Dense(12, activation='relu'))
 # model.add(Dropout(0.1))
 model.add(Dense(1, activation='tanh'))
