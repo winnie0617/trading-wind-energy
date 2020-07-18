@@ -22,7 +22,7 @@ from preprocess import interpolate
 BATCH_SIZE = 320
 TIMESTEPS = 24
 EPOCH = 100
-PATIENCE = 10
+PATIENCE = 5
 
 # Get energy production, wind speed and wind direction data
 
@@ -72,6 +72,17 @@ for i in range(num_inputs):
 min_energy = np.array(min_energy).reshape(-1, 1)
 min_energy_scaled = scale_data(min_energy)
 
+'''
+# Get mean energy production in the window
+mean_energy = []
+for i in range(num_inputs):
+    mean_energy.append(
+        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].mean())
+mean_energy = np.array(mean_energy).reshape(-1, 1)
+mean_energy_scaled = scale_data(mean_energy)
+print(mean_energy[:20])
+'''
+
 # Combine energy, speed and direction
 x = np.empty((num_inputs, 5))
 print(max_energy_scaled.shape)
@@ -117,6 +128,7 @@ model.add(Dense(1, activation='tanh'))
 # model.add(LSTM(48,  activation='tanh', input_shape=(TIMESTEPS, 3), return_sequences=False))
 # model.add(Dropout(0.1))
 # model.add(Dense(1, activation='tanh'))
+
 model.summary()
 
 
