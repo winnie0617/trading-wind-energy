@@ -16,16 +16,16 @@ from keras.callbacks import EarlyStopping
 from keras.layers import LSTM
 import csv
 from preprocess import interpolate
+from keras.regularizers import l2
 
 
 # Configuration
-BATCH_SIZE = 320
+BATCH_SIZE = 32
 TIMESTEPS = 24
 EPOCH = 100
 PATIENCE = 10
 
 # Get energy production, wind speed and wind direction data
-
 
 def scale_data(data):
     scaler = MinMaxScaler()
@@ -33,7 +33,7 @@ def scale_data(data):
     return scaler.transform(data)
 
 
-# Scale all datasets
+# Scale all datasetsc
 df_energy = pd.read_csv('../trading-wind-energy/energy-interpolated.csv')
 energys = df_energy['Energy Production (kWh)'].to_numpy().reshape(-1, 1)
 energys_scaled = scale_data(energys)
@@ -55,6 +55,27 @@ energys_shifted_scaled = scale_data(energys_shifted)
 # print("e shifted" + str(energys_shifted[:20, 0]))
 # print(energys_shifted.shape)
 # print("e shifted" + str(energys_shifted[30810:]))
+
+'''
+# Get all speeds
+df_all_speed = pd.read_csv('../trading-wind-energy/all-wind-speed.csv')
+speed = df_all_speed['Speed1 (m/s)'].to_numpy().reshape(-1, 1)
+scaled1 = scale_data(speed)
+speed = df_all_speed['Speed2 (m/s)'].to_numpy().reshape(-1, 1)
+scaled2 = scale_data(speed)
+speed = df_all_speed['Speed3 (m/s)'].to_numpy().reshape(-1, 1)
+scaled3 = scale_data(speed)
+speed = df_all_speed['Speed4 (m/s)'].to_numpy().reshape(-1, 1)
+scaled4 = scale_data(speed)
+speed = df_all_speed['Speed5 (m/s)'].to_numpy().reshape(-1, 1)
+scaled5 = scale_data(speed)
+speed = df_all_speed['Speed6 (m/s)'].to_numpy().reshape(-1, 1)
+scaled6 = scale_data(speed)
+speed = df_all_speed['Speed7 (m/s)'].to_numpy().reshape(-1, 1)
+scaled7 = scale_data(speed)
+speed = df_all_speed['Speed8 (m/s)'].to_numpy().reshape(-1, 1)
+scaled8 = scale_data(speed)
+'''
 
 # Get max energy production in the window
 max_energy = []
@@ -78,46 +99,53 @@ for i in range(num_inputs):
 min_energy = np.array(min_energy).reshape(-1, 1)
 min_energy_scaled = scale_data(min_energy)
 
-'''
-# Get mean energy production in the window
-mean_energy = []
-for i in range(num_inputs):
-    mean_energy.append(
-        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].mean())
-mean_energy = np.array(mean_energy).reshape(-1, 1)
-mean_energy_scaled = scale_data(mean_energy)
-print(mean_energy[:20])
-'''
-'''
 # Get difference
 print(df_energy['Energy Production (kWh)'].shape)
 print(num_inputs)
-difference = []
-for i in range(num_inputs):
+difference = [0]
+for i in range(1, num_inputs):
     difference.append(
         df_energy['Energy Production (kWh)'][i] - df_energy['Energy Production (kWh)'][i-1])
 difference = np.array(difference).reshape(-1, 1)
+# scaler = MinMaxScaler((-1,1))
+# scaler.fit(difference)
+# difference_scaled = scaler.transform(difference)
 difference_scaled = scale_data(difference)
 print(difference[:20])
-'''
 
-'''
+
 # Get mean energy production in the window
 mean_energy = []
 for i in range(num_inputs):
-    mean_energy.append(
-        df_energy['Energy Production (kWh)'][i:i+TIMESTEPS].mean())
+    if i < TIMESTEPS:
+        mean = df_energy['Energy Production (kWh)'][0:i+1].mean() 
+    else:
+        mean = df_energy['Energy Production (kWh)'][i-TIMESTEPS:i+1].mean()
+    mean_energy.append(mean)
 mean_energy = np.array(mean_energy).reshape(-1, 1)
 mean_energy_scaled = scale_data(mean_energy)
-print(mean_energy[:20])
-'''
+
+# Get standard deviation of energy production in the window
+sd_energy = []
+for i in range(num_inputs):
+    if i == 0:
+        sd =0
+    elif i < TIMESTEPS:
+        sd = df_energy['Energy Production (kWh)'][0:i+1].std()
+    else:
+        sd = df_energy['Energy Production (kWh)'][i-TIMESTEPS:i+1].std()
+    sd_energy.append(sd)
+sd_energy = np.array(sd_energy).reshape(-1, 1)
+sd_energy_scaled = scale_data(sd_energy)
+
 
 # Combine everything
-x = np.empty((num_inputs, 5))
+NUM_FEATURES = 7
+x = np.empty((num_inputs, NUM_FEATURES))
 print(max_energy_scaled.shape)
 print(energys_scaled.shape)
 for i in range(num_inputs):
-    x[i] = np.concatenate((energys_scaled[i], max_energy_scaled[i], min_energy_scaled[i],
+    x[i] = np.concatenate((energys_scaled[i], max_energy_scaled[i], min_energy_scaled[i], difference_scaled[i], mean_energy_scaled[i],
                      speeds_scaled[i], directions_scaled[i]))
 print(x[:10])
 print("x" + str(x.shape))
@@ -141,35 +169,44 @@ x_transformed = np.array(x_transformed)
 X_train, X_test, y_train, y_test = train_test_split(
     x_transformed[:-17], energys_shifted_scaled, test_size=0.2, shuffle=False)
 
-n_features = 1
+
 # X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
 # X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
 
 # Build model
 model = Sequential()
 
-model.add(LSTM(24,  activation='tanh', input_shape=(
-    TIMESTEPS, 5), return_sequences=True))
+# model.add(LSTM(12, activation='tanh', input_shape=(
+#     TIMESTEPS, NUM_FEATURES), return_sequences=False, activity_regularizer=l2(0.001)))
 # model.add(Dropout(0.1))
-model.add(LSTM(12,return_sequences=False))
+model.add(LSTM(24, input_shape=(TIMESTEPS, NUM_FEATURES), return_sequences=False, activity_regularizer=l2(0.001)))
+# model.add(Dropout(0.1))
+# model.add(LSTM(32,return_sequences=False))
 model.add(Dropout(0.1))
-# model.add(Dense(12, activation='relu'))
-# model.add(Dropout(0.1))
-model.add(Dense(1, activation='tanh'))
+model.add(Dense(12, activation='relu'))
+model.add(Dense(1, activation='relu'))
 # model.add(LSTM(48,  activation='tanh', input_shape=(TIMESTEPS, 3), return_sequences=False))
 # model.add(Dropout(0.1))
+
+# 
+# 
+# model.add(LSTM(24,  activation='tanh', input_shape=(
+#     TIMESTEPS, NUM_FEATURES), return_sequences=True, activity_regularizer=l2(0.001)))
+# model.add(LSTM(12,return_sequences=True))
+# model.add(Dropout(0.1))
+# model.add(LSTM(4,return_sequences=False))
+# model.add(Dropout(0.1))
 # model.add(Dense(1, activation='tanh'))
+# model.summary()
 
-model.summary()
 
-
-opt = optimizers.Adam(learning_rate=0.01)
+opt = optimizers.Adam(learning_rate=0.001)
 model.compile(loss='mean_squared_error', optimizer=opt)
 es = EarlyStopping(monitor='val_loss', patience=PATIENCE)
 
 # Train model
 history = model.fit(X_train, y_train, epochs=EPOCH,
-                    validation_split=0.2, batch_size=BATCH_SIZE, callbacks=[es], shuffle=True)
+                    validation_split=0.2, batch_size=BATCH_SIZE, callbacks=[es], shuffle=False)
 
 
 # Plot graphs regarding the results
@@ -189,8 +226,7 @@ print('Test loss: ', results)
 
 # Predict
 print('Generating Predictions')
-predictions_array = model.predict(
-    X_test, batch_size=32, callbacks=[es])
+predictions_array = model.predict(X_test, batch_size=BATCH_SIZE)
 
 # Plot predictions vs actuals
 plt.plot(predictions_array, label='predictions')
