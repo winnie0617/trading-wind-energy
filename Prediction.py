@@ -45,7 +45,8 @@ directions_scaler = scale_data(directions)
 
 
 
-while 1!=2:
+while True:
+
     timeSteps =24
     df_energy = pd.read_csv('energy-interpolated.csv')
     energys= df_energy['Energy Production (kWh)'].to_numpy().reshape(-1, 1)
@@ -68,6 +69,7 @@ while 1!=2:
     for i in range(timeSteps):
         directionData.append(directions_scaler.transform(directions[-1-i]))
 
+    #min
     min_energy = []
     min_energy_notscaled=[]
     for i in range(timeSteps):
@@ -77,6 +79,7 @@ while 1!=2:
     for i in range(len(min_energy)):
         min_energy.append[min_energy_scaler.transform(min_energy_notscaledp[i])]
 
+    #max
     max_energy = []
     max_energy_notscaled=[]
     for i in range(timeSteps):
@@ -86,6 +89,7 @@ while 1!=2:
     for i in range(len(max_energy)):
         max_energy.append[max_energy_scaler.transform(max_energy_notscaledp[i])]
 
+    #difference
     difference_energy_notscaled=[]
     difference_energy=[]
     for i in range(timeSteps):
@@ -95,6 +99,8 @@ while 1!=2:
     for i in range(len(difference_energy_notscaled)):
         difference_energy.append(difference_energy_notscaled[i])
 
+
+    #std
     std_energy = []
     std_energy_notscaled=[]
     for i in range(timeSteps):
@@ -104,6 +110,7 @@ while 1!=2:
     for i in range(len(std_energy)):
         std_energy.append[std_energy_scaler.transform(std_energy_notscaledp[i])]
 
+    #mean
     mean_energy_notscaled = []
     mean_energy =[]
     for i in range(timeSteps):
@@ -113,6 +120,10 @@ while 1!=2:
     for i in range(len(mean_energy)):
         mean_energy.append[mean_energy_scaler.transform(mean_energy_notscaledp[i])]
 
+
+    #####
+    Combine to be done tmr
+    #####
     value = model.predict()
     value = energys_scaler.inverse_transform(value)
     print(value)
