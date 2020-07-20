@@ -2,14 +2,18 @@
 # import pandas as pd
 # from datetime import datetime
 # import webbrowser
-import urllib.request 
+import urllib.request
 import requests
 import datetime
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
+import schedule
+import time
+from datetime import datetime
+from preprocess import get_average_speed, get_average_direction
 
 model = load_model('trading_model.h5')
-
+'''
 
 csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
@@ -20,9 +24,11 @@ def update_data(list):
         url = 'https://ai4impact.org/P003/historical/'+csv
         r = requests.get(url, allow_redirects=True)
         open('AppendixData/'+csv, 'wb').write(r.content)
+        print('Dataset ' + csv + ' updated')
 
-# schedule to call this:
-update_data(csv_list)
+
+
+
 
 def scale_data(data):
     scaler = MinMaxScaler()
@@ -66,7 +72,7 @@ while 1!=2:
     directionData = []
     for i in range(timeSteps):
         directionData.append(directions_scaler.transform(directions[-1-i]))
-    
+
     min_energy = []
     min_energy_notscaled=[]
     for i in range(timeSteps):
@@ -93,7 +99,7 @@ while 1!=2:
     difference_energy_scaler = scale_data(difference_energy_notscaled)
     for i in range(len(difference_energy_notscaled)):
         difference_energy.append(difference_energy_notscaled[i])
-    
+
     std_energy = []
     std_energy_notscaled=[]
     for i in range(timeSteps):
@@ -116,3 +122,17 @@ while 1!=2:
     value = energys_scaler.inverse_transform(value)
     print(value)
     webbrowser.open("http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
+
+'''
+
+def predict():
+    print(datetime.now())
+    update_data(csv_list)
+    get_average_speed(csv_list)
+    get_average_direction(csv_list)
+
+schedule.every(10).seconds.do(predict)
+
+while True:
+    schedule.run_pending()
+    time.sleep(1)
