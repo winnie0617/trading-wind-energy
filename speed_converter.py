@@ -11,15 +11,26 @@ def combine_speeds(path1, path2):
     df_combined = pd.concat([df1, df2])
     return df_combined.drop(columns='Direction (deg N)')
 
-
+'''
 if __name__ == "__main__":
-    csv_list = [['AppendixData/angerville-1.csv', 'AppendixData/angerville-1-b.csv'], ['AppendixData/angerville-2.csv',
-                                                                                       'AppendixData/angerville-2-b.csv'], ['AppendixData/arville.csv', 'AppendixData/arville-b.csv'], ['AppendixData/boissy-la-riviere.csv', 'AppendixData/boissy-la-riviere-b.csv'], ['AppendixData/guitrancourt.csv', 'AppendixData/guitrancourt-b.csv'], ['AppendixData/lieusaint.csv', 'AppendixData/lieusaint-b.csv'], ['AppendixData/lvs-pussay.csv', 'AppendixData/lvs-pussay-b.csv'], ['AppendixData/parc-du-gatinais.csv', 'AppendixData/parc-du-gatinais-b.csv']]
+
     df_list = []
     for pair in csv_list:
         df = combine_speeds(pair[0], pair[1])
         df = interpolate(df)
         df_list.append(df)
     df = pd.concat(df_list, axis=1).mean(axis=1)
-    df.to_csv('average-wind-speed.csv', index_label='Time', header=['Average Speed (m/s)'])
+    df.to_csv('average-wind-speed.csv', index_label='Time',
+              header=['Average Speed (m/s)'])
+'''
+# Get average speed
+# csv_list = ['AppendixData/angerville-1.csv', 'AppendixData/angerville-1-b.csv', 'AppendixData/angerville-2.csv', 'AppendixData/angerville-2-b.csv', 'AppendixData/arville.csv', 'AppendixData/arville-b.csv', 'AppendixData/boissy-la-riviere.csv', 'AppendixData/boissy-la-riviere-b.csv',
+            # 'AppendixData/guitrancourt.csv', 'AppendixData/guitrancourt-b.csv', 'AppendixData/lieusaint.csv', 'AppendixData/lieusaint-b.csv', 'AppendixData/lvs-pussay.csv', 'AppendixData/lvs-pussay-b.csv', 'AppendixData/parc-du-gatinais.csv', 'AppendixData/parc-du-gatinais-b.csv']
 
+csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
+            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
+
+
+
+get_average(csv_list, 'Speed (m/s)', 'Direction (deg N)')
+get_average(csv_list, 'Speed (m/s)', 'Direction (deg N)')
