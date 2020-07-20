@@ -24,6 +24,7 @@ BATCH_SIZE = 32
 TIMESTEPS = 24
 EPOCH = 100
 PATIENCE = 10
+LEARNING_RATE = 0.001
 
 # Get energy production, wind speed and wind direction data
 
@@ -33,7 +34,7 @@ def scale_data(data):
     return scaler.transform(data)
 
 
-# Scale all datasetsc
+# Scale all datasets
 df_energy = pd.read_csv('../trading-wind-energy/energy-interpolated.csv')
 energys = df_energy['Energy Production (kWh)'].to_numpy().reshape(-1, 1)
 energys_scaled = scale_data(energys)
@@ -184,7 +185,7 @@ model.add(LSTM(24, input_shape=(TIMESTEPS, NUM_FEATURES), return_sequences=False
 # model.add(LSTM(32,return_sequences=False))
 model.add(Dropout(0.1))
 model.add(Dense(12, activation='relu'))
-model.add(Dense(1, activation='relu'))
+model.add(Dense(1, activation='linear'))
 # model.add(LSTM(48,  activation='tanh', input_shape=(TIMESTEPS, 3), return_sequences=False))
 # model.add(Dropout(0.1))
 
@@ -200,9 +201,9 @@ model.add(Dense(1, activation='relu'))
 # model.summary()
 
 
-opt = optimizers.Adam(learning_rate=0.001)
+opt = optimizers.Adam(learning_rate=LEARNING_RATE)
 model.compile(loss='mean_squared_error', optimizer=opt)
-es = EarlyStopping(monitor='val_loss', patience=PATIENCE)
+es = EarlyStopping(monitor='val_loss', patience=PATIENCE, min_delta=0.0001)
 
 # Train model
 history = model.fit(X_train, y_train, epochs=EPOCH,
