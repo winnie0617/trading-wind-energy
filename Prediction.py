@@ -13,7 +13,6 @@ from datetime import datetime
 from preprocess import get_average_speed, get_average_direction
 
 model = load_model('trading_model.h5')
-'''
 
 csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
@@ -25,10 +24,6 @@ def update_data(list):
         r = requests.get(url, allow_redirects=True)
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
-
-
-
-
 
 def scale_data(data):
     scaler = MinMaxScaler()
@@ -123,7 +118,6 @@ while 1!=2:
     print(value)
     webbrowser.open("http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
 
-'''
 
 def predict():
     print(datetime.now())
