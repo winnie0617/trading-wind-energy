@@ -123,7 +123,7 @@ def generate_prediction():
     predict()
 
 
-schedule.every().hour.at(':50').do(generate_prediction
+schedule.every().hour.at(':50').do(generate_prediction)
 
 while True:
     schedule.run_pending()
