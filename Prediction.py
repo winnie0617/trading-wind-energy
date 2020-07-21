@@ -16,7 +16,7 @@ from preprocess import get_average_speed, get_average_direction
 import numpy as np
 
 
-model = load_model('trading_model.h5')
+model = load_model('finalTradingModel.h5')
 csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
@@ -122,8 +122,8 @@ def generate_prediction():
     get_average_direction(csv_list)
     predict()
 
-
-schedule.every().hour.at(':50').do(generate_prediction)
+#i thiink we need the () for generate_prediction?
+schedule.every().hour.at(':50').do(generate_prediction())
 
 while True:
     schedule.run_pending()
