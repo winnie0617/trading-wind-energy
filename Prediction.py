@@ -5,13 +5,12 @@ import webbrowser
 import urllib.request
 from numpy import array
 import requests
-import datetime
+import csv
 import pandas as pd
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 import schedule
 import time
-from datetime import datetime
 from preprocess import get_average_speed, get_average_direction
 import numpy as np
 
@@ -112,6 +111,9 @@ def predict():
     webbrowser.open(
         "http://3.1.52.222/submit/pred?pwd=7351140636&value="+str(value[0][0]))
 
+    with open('result.csv', 'a',) as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([datetime.now(),value])
 # Put all steps together
 
 
@@ -128,3 +130,4 @@ schedule.every().hour.at(':50').do(generate_prediction)
 while True:
     schedule.run_pending()
     time.sleep(1)
+    
