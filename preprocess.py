@@ -24,7 +24,6 @@ def get_average_speed(csv_list):
     for csv in csv_list:
         df = pd.read_csv('AppendixData/'+csv, header=3)
         df = interpolate(df)
-        print(df.shape)
         data_list.append(df.drop(columns='Direction (deg N)'))
     df = pd.concat(data_list, axis=1).mean(axis=1)
     df.to_csv('average-wind-speed.csv', index_label='Time',
@@ -36,7 +35,6 @@ def get_average_direction(csv_list):
     for csv in csv_list:
         df = pd.read_csv('AppendixData/'+csv, header=3)
         df = interpolate(df)
-        print(df.shape)
         data_list.append(df.drop(columns='Speed(m/s)'))
     df = pd.concat(data_list, axis=1).mean(axis=1)
     df.to_csv('average-wind-direction.csv', index_label='Time',

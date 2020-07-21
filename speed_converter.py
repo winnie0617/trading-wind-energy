@@ -27,10 +27,3 @@ if __name__ == "__main__":
 # csv_list = ['AppendixData/angerville-1.csv', 'AppendixData/angerville-1-b.csv', 'AppendixData/angerville-2.csv', 'AppendixData/angerville-2-b.csv', 'AppendixData/arville.csv', 'AppendixData/arville-b.csv', 'AppendixData/boissy-la-riviere.csv', 'AppendixData/boissy-la-riviere-b.csv',
             # 'AppendixData/guitrancourt.csv', 'AppendixData/guitrancourt-b.csv', 'AppendixData/lieusaint.csv', 'AppendixData/lieusaint-b.csv', 'AppendixData/lvs-pussay.csv', 'AppendixData/lvs-pussay-b.csv', 'AppendixData/parc-du-gatinais.csv', 'AppendixData/parc-du-gatinais-b.csv']
 
-csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
-            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
-
-
-
-get_average(csv_list, 'Speed (m/s)', 'Direction (deg N)')
-get_average(csv_list, 'Speed (m/s)', 'Direction (deg N)')

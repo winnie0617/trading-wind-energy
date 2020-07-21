@@ -1,7 +1,8 @@
-# from keras.models import load_model
-# import pandas as pd
-# from datetime import datetime
-# import webbrowser
+'''
+from keras.models import load_model
+import pandas as pd
+from datetime import datetime
+import webbrowser
 import urllib.request
 from numpy import array
 import requests
@@ -9,16 +10,14 @@ import datetime
 import pandas as pd
 from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
-#import schedule
-import numpy as np
+import schedule
 import time
 from datetime import datetime
 from preprocess import get_average_speed, get_average_direction
 
+
 model = load_model('trading_model.h5')
 
-csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
-            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 
 
 def update_data(list):
@@ -85,7 +84,7 @@ while x!=1:
             Data = scaler.transform(list)
         print(Data)
         return(Data)
-    
+
     energyData = convert(energys,energys_scaler,"energys")
     speedData = convert(speeds,speeds_scaler,"speeds")
     directionData =convert(directions,directions_scaler,"directions" )
@@ -111,69 +110,35 @@ while x!=1:
     x=1
     #webbrowser.open("http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
     '''
-    #min
-    min_energy = []
-    min_energy_notscaled=[]
-    for i in range(timeSteps):
-        min = df_energy['Energy Production (kWh)'][-1:-1-i].min()
-        min_energy_notscaled.append(min)
-    min_energy_scaler = scale_data(min_energy_notscaled)
-    for i in range(len(min_energy)):
-        min_energy.append[min_energy_scaler.transform(min_energy_notscaled[i])]
-
-    #max
-    max_energy = []
-    max_energy_notscaled=[]
-    for i in range(timeSteps):
-        max = df_energy['Energy Production (kWh)'][-1:-1-i].max()
-        max_energy_notscaled.append(max)
-    max_energy_scaler = scale_data(max_energy_notscaled)
-    for i in range(len(max_energy)):
-        max_energy.append[max_energy_scaler.transform(max_energy_notscaled[i])]
-
-    #difference
-    difference_energy_notscaled=[]
-    difference_energy=[]
-    for i in range(timeSteps):
-        difference =df_energy['Energy Production (kWh)'][-1-i] - df_energy['Energy Production (kWh)'][-i-2]
-        difference_energy_notscaled.append(difference)
-    difference_energy_scaler = scale_data(difference_energy_notscaled)
-    for i in range(len(difference_energy_notscaled)):
-        difference_energy.append(difference_energy_notscaled[i])
 
 
-  
-    #std
-    std_energy = []
-    std_energy_notscaled=[]
-    for i in range(timeSteps):
-        std = df_energy['Energy Production (kWh)'][-1:-1-i].std()
-        std_energy_notscaled.append(std)
-    std_energy_scaler = scale_data(std_energy_notscaled)
-    for i in range(len(std_energy)):
-        std_energy.append[std_energy_scaler.transform(std_energy_notscaledp[i])]
-    
-    #mean
-    mean_energy_notscaled = []
-    mean_energy =[]
-    for i in range(timeSteps):
-        mean = df_energy['Energy Production (kWh)'][-1:-1-i].mean()
-        mean_energy_notscaled.append(mean)
-    mean_energy_scaler = scale_data(mean_energy_notscaled)
-    for i in range(len(mean_energy)):
-        mean_energy.append[mean_energy_scaler.transform(mean_energy_notscaledp[i])]
-
-    '''
-    
+    #####
+    Combine to be done tmr
+    #####
+    value = model.predict()
+    value = energys_scaler.inverse_transform(value)
+    print(value)
+    webbrowser.open("http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
 
 '''
+csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
+            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
+
+def update_data(list):
+    for csv in list:
+        url = 'https://ai4impact.org/P003/historical/'+csv
+        r = requests.get(url, allow_redirects=True)
+        open('AppendixData/'+csv, 'wb').write(r.content)
+        print('Dataset ' + csv + ' updated')
+
+
 def predict():
     print(datetime.now())
     update_data(csv_list)
     get_average_speed(csv_list)
     get_average_direction(csv_list)
 
-schedule.every(10).seconds.do(predict)
+schedule.every().hour.at(':15').do(predict)
 
 while True:
     schedule.run_pending()

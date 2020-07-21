@@ -57,26 +57,6 @@ energys_shifted_scaled = scale_data(energys_shifted)
 # print(energys_shifted.shape)
 # print("e shifted" + str(energys_shifted[30810:]))
 
-'''
-# Get all speeds
-df_all_speed = pd.read_csv('../trading-wind-energy/all-wind-speed.csv')
-speed = df_all_speed['Speed1 (m/s)'].to_numpy().reshape(-1, 1)
-scaled1 = scale_data(speed)
-speed = df_all_speed['Speed2 (m/s)'].to_numpy().reshape(-1, 1)
-scaled2 = scale_data(speed)
-speed = df_all_speed['Speed3 (m/s)'].to_numpy().reshape(-1, 1)
-scaled3 = scale_data(speed)
-speed = df_all_speed['Speed4 (m/s)'].to_numpy().reshape(-1, 1)
-scaled4 = scale_data(speed)
-speed = df_all_speed['Speed5 (m/s)'].to_numpy().reshape(-1, 1)
-scaled5 = scale_data(speed)
-speed = df_all_speed['Speed6 (m/s)'].to_numpy().reshape(-1, 1)
-scaled6 = scale_data(speed)
-speed = df_all_speed['Speed7 (m/s)'].to_numpy().reshape(-1, 1)
-scaled7 = scale_data(speed)
-speed = df_all_speed['Speed8 (m/s)'].to_numpy().reshape(-1, 1)
-scaled8 = scale_data(speed)
-'''
 
 # Get max energy production in the window
 max_energy = []
