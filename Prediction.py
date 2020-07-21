@@ -21,7 +21,7 @@ csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'anger
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
 
-
+#update the datasets
 def update_data(list):
     for csv in list:
         url = 'https://ai4impact.org/P003/historical/'+csv
@@ -29,7 +29,7 @@ def update_data(list):
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
 
-
+#provide scalers for respective 
 def scaler_data(data):
     scaler = MinMaxScaler()
     scaler.fit(data)
@@ -122,8 +122,8 @@ def generate_prediction():
     get_average_direction(csv_list)
     predict()
 
-#i thiink we need the () for generate_prediction?
-schedule.every().hour.at(':50').do(generate_prediction())
+
+schedule.every().hour.at(':50').do(generate_prediction
 
 while True:
     schedule.run_pending()
