@@ -13,9 +13,13 @@ import schedule
 import time
 from datetime import datetime
 from preprocess import get_average_speed, get_average_direction
+import numpy as np
 
 
 model = load_model('trading_model.h5')
+csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
+            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
+time_step = 24
 
 
 def update_data(list):
@@ -26,17 +30,10 @@ def update_data(list):
         print('Dataset ' + csv + ' updated')
 
 
-def update_data(list):
-    for csv in list:
-        url = 'https://ai4impact.org/P003/historical/'+csv
-        r = requests.get(url, allow_redirects=True)
-        open('AppendixData/'+csv, 'wb').write(r.content)
-        print('Dataset ' + csv + ' updated')
-
-
-df_energy = pd.read_csv('energy-interpolated.csv')
-energys = df_energy['Energy Production (kWh)'].to_numpy().reshape(-1, 1)
-energys_scaler = scale_data(energys)
+def scaler_data(data):
+    scaler = MinMaxScaler()
+    scaler.fit(data)
+    return scaler
 
 
 def scale_data(data):
@@ -59,30 +56,29 @@ directions = df_direction['Average Direction (deg N)'].to_numpy(
 directions_scaler = scaler_data(directions)
 
 
-def transform_inputs():
-
-    time_step = 24
+def convert(file, scaler, name):
+    list = []
+    for i in range(time_step):
+        if name == "min":
+            list.append(np.amin(file[-time_step-i:-1-i]))
+            print(list)
+        if name == "max":
+            list.append(np.amax(file[-time_step-i:-1-i]))
+        if name == "difference":
+            list.append(file[-i-1]-file[-2-i])
+        if name == "mean":
+            list.append(np.average(file[-time_step-i:-1-i]))
+        else:
+            list.append(file[-1-i])
+    list = np.reshape(list, (-1, 1))
+    if name == "min" or name == "max" or name == "difference" or name == "mean":
+        Data = scale_data(list)
+    else:
+        Data = scaler.transform(list)
+    return Data
 
 
 def predict():
-
-    csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
-            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
-
-    def update_data(list):
-        for csv in list:
-            url = 'https://ai4impact.org/P003/historical/'+csv
-            r = requests.get(url, allow_redirects=True)
-            open('AppendixData/'+csv, 'wb').write(r.content)
-            print('Dataset ' + csv + ' updated')
-
-    def update():
-        print(datetime.now())
-        update_data(csv_list)
-        get_average_speed(csv_list)
-        get_average_direction(csv_list)
-
-    update()
 
     df_energy = pd.read_csv('energy-interpolated.csv')
     energys = df_energy['Energy Production (kWh)'].to_numpy().reshape(-1, 1)
@@ -92,149 +88,42 @@ def predict():
     directions = df_direction['Average Direction (deg N)'].to_numpy(
     ).reshape(-1, 1)
 
-    timeSteps = 12
     # return scaled data
-
-    def convert(file, scaler, name):
-        list = []
-        for i in range(timeSteps):
-            if name == "min":
-                list.append(np.amin(file[-timeSteps-i:-1-i]))
-                print(list)
-            if name == "max":
-                list.append(np.amax(file[-timeSteps-i:-1-i]))
-            if name == "difference":
-                list.append(file[-i-1]-file[-2-i])
-            if name == "mean":
-                list.append(np.average(file[-timeSteps-i:-1-i]))
-            else:
-                list.append(file[-1-i])
-        list = np.reshape(list, (-1, 1))
-        if name == "min" or name == "max" or name == "difference" or name == "mean":
-            Data = scale_data(list)
-        else:
-            Data = scaler.transform(list)
-        print(Data)
-        return(Data)
-
-    energyData = convert(energys, energys_scaler, "energys")
-    speedData = convert(speeds, speeds_scaler, "speeds")
-    directionData = convert(directions, directions_scaler, "directions")
+    energy_data = convert(energys, energys_scaler, "energys")
+    speed_data = convert(speeds, speeds_scaler, "speeds")
+    direction_data = convert(directions, directions_scaler, "directions")
     min_energy = convert(energys, 0, "min")
     max_energy = convert(energys, 0, "max")
     difference_energy = convert(energys, 0, "difference")
     mean_energy = convert(energys, 0, "mean")
 
-    energy_data = energys_scaler.transform()
-    speed_data = speeds_scaler.transform()
-    directionData = directions_scaler.transform()
-    time_step = 24
-    energy_data = []
+    # combine features
+    NUM_FEATURES = 7
+    x = np.empty((time_step, NUM_FEATURES))
     for i in range(time_step):
-        energy_data.append(energys_scaler.transform(energys[-1-i]))
-    speed_data = []
-    for i in range(time_step):
-        speed_data.append(speeds_scaler.transform(speeds[-1-i]))
-    directionData = []
-    for i in range(time_step):
-        directionData.append(directions_scaler.transform(directions[-1-i]))
+        x[i] = np.concatenate((energy_data[i], max_energy[i], min_energy[i], difference_energy[i], mean_energy[i],
+                               speed_data[i], direction_data[i]))
 
-    # min
-    min_energy = []
-    min_energy_notscaled = []
-    for i in range(time_step):
-        min = df_energy['Energy Production (kWh)'][-1:-1-i].min()
-        min_energy_notscaled.append(min)
-    min_energy_scaler = scale_data(min_energy_notscaled)
-    for i in range(len(min_energy)):
-        min_energy.append[min_energy_scaler.transform(
-            min_energy_notscaledp[i])]
-
-    # max
-    max_energy = []
-    max_energy_notscaled = []
-    for i in range(time_step):
-        max = df_energy['Energy Production (kWh)'][-1:-1-i].max()
-        max_energy_notscaled.append(max)
-    max_energy_scaler = scale_data(max_energy_notscaled)
-    for i in range(len(max_energy)):
-        max_energy.append[max_energy_scaler.transform(
-            max_energy_notscaledp[i])]
-
-    # difference
-    difference_energy_notscaled = []
-    difference_energy = []
-    for i in range(time_step):
-        difference = df_energy['Energy Production (kWh)'][-1-i] - df_energy['Energy Production (kWh)'][-i-2]))
-        difference_energy_notscaled.append(difference)
-    difference_energy_scaler=scale_data(difference_energy_notscaled)
-    for i in range(len(difference_energy_notscaled)):
-        difference_energy.append(difference_energy_notscaled[i])
-
-
-    # std
-    std_energy=[]
-    std_energy_notscaled=[]
-    for i in range(time_step):
-        std=df_energy['Energy Production (kWh)'][-1:-1-i].std()
-        std_energy_notscaled.append(std)
-    std_energy_scaler=scale_data(std_energy_notscaled)
-    for i in range(len(std_energy)):
-        std_energy.append[std_energy_scaler.transform(
-            std_energy_notscaledp[i])]
-
-    # mean
-    mean_energy_notscaled=[]
-    mean_energy=[]
-    for i in range(time_step):
-        mean=df_energy['Energy Production (kWh)'][-1: -1-i].mean()
-        mean_energy_notscaled.append(mean)
-    mean_energy_scaler=scale_data(mean_energy_notscaled)
-    for i in range(len(mean_energy)):
-        mean_energy.append[mean_energy_scaler.transform(
-            mean_energy_notscaledp[i])]
-
-    #####
-    # Combine to be done tmr
-    NUM_FEATURES=7
-    x=np.empty((timeSteps, NUM_FEATURES))
-    for i in range(timeSteps):
-        x[i]=np.concatenate((energyData[i], max_energy[i], min_energy[i], difference_energy[i], mean_energy[i],
-                        speedData[i], directionData[i]))
-
-    #####
-    x=array(x)
-    x=x.reshape((1, 12, 7))
-    value=model.predict(x)
-    value=energys_scaler.inverse_transform(value)
-    print(value)
+    x = array(x)
+    x = x.reshape((1, time_step, NUM_FEATURES))
+    value = model.predict(x)
+    value = energys_scaler.inverse_transform(value)
+    print('Prediction is ' + str(value[0][0]))
     webbrowser.open(
-        "http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
-
-
-    '''
-     #####
-    Combine to be done tmr
-    #####
-    value=model.predict()
-    value=energys_scaler.inverse_transform(value)
-    print(value)
-    webbrowser.open("http://3.1.52.222/submit/pred?pwd=7351140636&value="+value)
-    '''
-
-
-csv_list=['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
-            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
+        "http://3.1.52.222/submit/pred?pwd=7351140636&value="+str(value[0][0]))
 
 # Put all steps together
-def predict():
+
+
+def generate_prediction():
     print(datetime.now())
     update_data(csv_list)
     get_average_speed(csv_list)
     get_average_direction(csv_list)
-    transform_inputs()
+    predict()
 
-schedule.every().hour.at(':15').do(predict)
+
+schedule.every().hour.at(':50').do(generate_prediction)
 
 while True:
     schedule.run_pending()
