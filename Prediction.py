@@ -17,7 +17,7 @@ import numpy as np
 
 model = load_model('finalTradingModel.h5')
 csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'angerville-2-b.csv', 'arville.csv', 'arville-b.csv', 'boissy-la-riviere.csv', 'boissy-la-riviere-b.csv',
-            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv','energy-ile-de-france.csv']
+            'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
 
 # update energy dataset
@@ -31,6 +31,9 @@ def update_data(list):
         r = requests.get(url, allow_redirects=True)
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
+    url = 'https://ai4impact.org/P003/historical/' +"energy-ile-de-france.csv"
+    r = requests.get(url, allow_redirects=True)
+    open("energy-ile-de-france.csv", 'wb').write(r.content)
 
 # provide scalers for respective
 
@@ -141,9 +144,11 @@ def generate_prediction():
     get_interpolated_energy()
     predict()
 
-
+generate_prediction()
+'''
 schedule.every().hour.at(':50').do(generate_prediction)
 
 while True:
     schedule.run_pending()
     time.sleep(1)
+'''
