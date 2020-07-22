@@ -11,7 +11,7 @@ from keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
 import schedule
 import time
-from preprocess import get_average_speed, get_average_direction
+from preprocess import get_average_speed, get_average_direction, get_interpolated_energy
 import numpy as np
 
 
@@ -20,12 +20,14 @@ csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'anger
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
 
+# update energy dataset
+
 # update the datasets
 
 
 def update_data(list):
     for csv in list:
-        url = 'https://ai4impact.org/P003/historical/'+csv
+        url = 'https://ai4impact.org/P003/historical/' + csv
         r = requests.get(url, allow_redirects=True)
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
@@ -136,6 +138,7 @@ def generate_prediction():
     update_data(csv_list)
     get_average_speed(csv_list)
     get_average_direction(csv_list)
+    get_interpolated_energy()
     predict()
 
 
