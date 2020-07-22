@@ -20,7 +20,9 @@ csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'anger
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
 
-#update the datasets
+# update the datasets
+
+
 def update_data(list):
     for csv in list:
         url = 'https://ai4impact.org/P003/historical/'+csv
@@ -28,7 +30,9 @@ def update_data(list):
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
 
-#provide scalers for respective 
+# provide scalers for respective
+
+
 def scaler_data(data):
     scaler = MinMaxScaler()
     scaler.fit(data)
@@ -59,19 +63,19 @@ def convert(file, scaler, name):
     list = []
     for i in range(time_step):
         if name == "min":
-            if i ==0:
+            if i == 0:
                 list.append(np.amin(file[-time_step-i:]))
             else:
                 list.append(np.amin(file[-time_step-i:-i]))
         if name == "max":
-            if i==0:
+            if i == 0:
                 list.append(np.amax(file[-time_step-i:]))
             else:
                 list.append(np.amax(file[-time_step-i:-i]))
         if name == "difference":
             list.append(file[-i-1]-file[-2-i])
         if name == "mean":
-            if i==0:
+            if i == 0:
                 list.append(np.average(file[-time_step-i:]))
             else:
                 list.append(np.average(file[-time_step-i:-i]))
@@ -106,10 +110,12 @@ def predict():
 
     # combine features
     NUM_FEATURES = 7
+    y = 0
     x = np.empty((time_step, NUM_FEATURES))
-    for i in range(time_step):
-        x[i] = np.concatenate((energy_data[i], max_energy[i], min_energy[i], difference_energy[i], mean_energy[i],
+    for i in reversed(range(time_step)):
+        x[y] = np.concatenate((energy_data[i], max_energy[i], min_energy[i], difference_energy[i], mean_energy[i],
                                speed_data[i], direction_data[i]))
+        y += 1
 
     x = array(x)
     x = x.reshape((1, time_step, NUM_FEATURES))
@@ -121,7 +127,7 @@ def predict():
 
     with open('result.csv', 'a',) as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow([datetime.now(),value])
+        writer.writerow([datetime.now(), value])
 # Put all steps together
 
 
@@ -138,4 +144,3 @@ schedule.every().hour.at(':50').do(generate_prediction)
 while True:
     schedule.run_pending()
     time.sleep(1)
-    
