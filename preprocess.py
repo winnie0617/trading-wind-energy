@@ -40,3 +40,8 @@ def get_average_direction(csv_list):
     df.to_csv('average-wind-direction.csv', index_label='Time',
               header=['Average Direction (deg N)'])
     print("Updated average direction")
+
+def get_interpolated_energy():
+    df = pd.read_csv('DataWithNormalTime.csv', header=None, names=['Time', 'Energy Production (kWh)'])
+    energy_production = interpolate(df)
+    energy_production.to_csv('energy-interpolated.csv', index_label='Time') 
