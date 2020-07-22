@@ -59,14 +59,22 @@ def convert(file, scaler, name):
     list = []
     for i in range(time_step):
         if name == "min":
-            list.append(np.amin(file[-time_step-i:-1-i]))
-            print(list)
+            if i ==0:
+                list.append(np.amin(file[-time_step-i:]))
+            else:
+                list.append(np.amin(file[-time_step-i:-i]))
         if name == "max":
-            list.append(np.amax(file[-time_step-i:-1-i]))
+            if i==0:
+                list.append(np.amax(file[-time_step-i:]))
+            else:
+                list.append(np.amax(file[-time_step-i:-i]))
         if name == "difference":
             list.append(file[-i-1]-file[-2-i])
         if name == "mean":
-            list.append(np.average(file[-time_step-i:-1-i]))
+            if i==0:
+                list.append(np.average(file[-time_step-i:]))
+            else:
+                list.append(np.average(file[-time_step-i:-i]))
         else:
             list.append(file[-1-i])
     list = np.reshape(list, (-1, 1))
