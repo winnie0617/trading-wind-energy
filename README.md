@@ -3,8 +3,11 @@
 ## Objective
 Why is this important?
 
-## Packages?
-Keras
+## Packages
+```python
+import keras ```
+
+## Layers and Nodes 
 
 ```python
 model = Sequential()
