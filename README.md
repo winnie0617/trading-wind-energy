@@ -5,16 +5,36 @@ Why is this important?
 
 ## Packages
 ```python
-import keras ```
+import keras 
+```
 
+
+## Parameters 
+```python
+BATCH_SIZE = 32
+TIMESTEPS = 24
+EPOCH = 100
+PATIENCE = 10
+LEARNING_RATE = 0.001
 ## Layers and Nodes 
+```
 
+##  LSTM Layers and Nodes
 ```python
 model = Sequential()
 model.add(LSTM(24, input_shape=(TIMESTEPS, NUM_FEATURES), return_sequences=False, activity_regularizer=l2(0.001)))
 model.add(Dropout(0.1))
 model.add(Dense(12, activation='relu'))
 model.add(Dense(1, activation='linear'))
+
+opt = optimizers.Adam(learning_rate=LEARNING_RATE)
+model.compile(loss='mean_squared_error', optimizer=opt)
+es = EarlyStopping(monitor='val_loss', patience=PATIENCE, min_delta=0.0001)
+
+# Train model
+history = model.fit(X_train, y_train, epochs=EPOCH,
+                    validation_split=0.2, batch_size=BATCH_SIZE, callbacks=[es], shuffle=False)
+
 ```
 
 ## Preliminary Data Analysis
