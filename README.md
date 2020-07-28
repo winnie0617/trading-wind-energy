@@ -71,7 +71,7 @@ history = model.fit(X_train, y_train, epochs=EPOCH,
 
 Prediction
 
-<img src="https://github.com/winnie0617/trading-wind-energy/blob/master/Graphs/8-predictions.png" width =500>
+<img src="https://github.com/winnie0617/trading-wind-energy/blob/master/Graphs/8-predictions.png" >
 
 
 ## Limitations
