@@ -144,11 +144,10 @@ def generate_prediction():
     get_interpolated_energy()
     predict()
 
-generate_prediction()
-'''
+
+
 schedule.every().hour.at(':50').do(generate_prediction)
 
 while True:
     schedule.run_pending()
     time.sleep(1)
-'''
