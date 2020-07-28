@@ -20,24 +20,18 @@ csv_list = ['angerville-1.csv', 'angerville-1-b.csv', 'angerville-2.csv', 'anger
             'guitrancourt.csv', 'guitrancourt-b.csv', 'lieusaint.csv', 'lieusaint-b.csv', 'lvs-pussay.csv', 'lvs-pussay-b.csv', 'parc-du-gatinais.csv', 'parc-du-gatinais-b.csv']
 time_step = 24
 
-# update energy dataset
-
-# update the datasets
-
-
+# update all the datasets
 def update_data(list):
     for csv in list:
         url = 'https://ai4impact.org/P003/historical/' + csv
         r = requests.get(url, allow_redirects=True)
         open('AppendixData/'+csv, 'wb').write(r.content)
         print('Dataset ' + csv + ' updated')
-    url = 'https://ai4impact.org/P003/historical/' +"energy-ile-de-france.csv"
+    url = 'https://ai4impact.org/P003/historical/' + "energy-ile-de-france.csv"
     r = requests.get(url, allow_redirects=True)
     open("energy-ile-de-france.csv", 'wb').write(r.content)
 
 # provide scalers for respective
-
-
 def scaler_data(data):
     scaler = MinMaxScaler()
     scaler.fit(data)
