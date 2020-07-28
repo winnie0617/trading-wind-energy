@@ -6,13 +6,13 @@ Why is this important?
 ## Packages?
 Keras
 
-'''python
+```python
 model = Sequential()
 model.add(LSTM(24, input_shape=(TIMESTEPS, NUM_FEATURES), return_sequences=False, activity_regularizer=l2(0.001)))
 model.add(Dropout(0.1))
 model.add(Dense(12, activation='relu'))
 model.add(Dense(1, activation='linear'))
-'''
+```
 
 ## Preliminary Data Analysis
 There are two main datasets - Wind Energy Production and Wind Forecasts. In order to have a rough idea of the features we are going to use in our neural network model, we created several plots to gain a better understanding of the data.
